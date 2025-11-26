@@ -3,9 +3,8 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
-import Link from "next/link";
 import Image from "next/image";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/store/features/user/userSlice";
@@ -127,12 +126,14 @@ export default function LoginForm() {
                   </div>
                 </div>
                 <div className="flex items-center justify-end">
-                  <Link
-                    href="/reset-password"
+                  <a
+                    href={process.env.NEXT_PUBLIC_API_BASE_URL_FOR_LOGIN}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
                   >
-                    Forgot password?
-                  </Link>
+                    Problems signing in?
+                  </a>
                 </div>
                 <div>
                   <Button
