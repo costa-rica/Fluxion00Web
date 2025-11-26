@@ -13,7 +13,9 @@ import { loginUser } from "@/store/features/user/userSlice";
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, emailSetter] = useState(
-    process.env.NEXT_PUBLIC_MODE === "workstation" ? "nrodrig1@gmail.com" : ""
+    process.env.NEXT_PUBLIC_MODE === "workstation"
+      ? "nickrodriguez@kineticmetrics.com"
+      : ""
   );
   const [password, passwordSetter] = useState(
     process.env.NEXT_PUBLIC_MODE === "workstation" ? "test" : ""
@@ -29,8 +31,6 @@ export default function LoginForm() {
       router.push("/home");
       return;
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userReducer.token, router]);
 
   const handleClickLogin = async () => {
