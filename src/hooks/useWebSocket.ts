@@ -9,12 +9,14 @@ import {
 	setTyping,
 	addMessage,
 } from "@/store/features/chat/chatSlice";
+import { PROVIDER_TO_BACKEND } from "@/types/llm";
 
 export const useWebSocket = () => {
 	const dispatch = useAppDispatch();
 	const ws = useRef<WebSocket | null>(null);
 	const token = useAppSelector((state) => state.user.token);
 	const clientId = useAppSelector((state) => state.chat.clientId);
+	const llmConfig = useAppSelector((state) => state.llm.config);
 
 	// Generate or use existing client ID
 	useEffect(() => {
@@ -30,9 +32,20 @@ export const useWebSocket = () => {
 
 		const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 		const wsUrl = baseUrl.replace(/^http/, "ws");
-		const url = `${wsUrl}/ws/${clientId}?token=${token}`;
 
-		console.log("Connecting to WebSocket:", url);
+		// Map frontend provider to backend provider (chatgpt -> openai)
+		const backendProvider = PROVIDER_TO_BACKEND[llmConfig.provider];
+
+		// Build URL with provider and model query parameters
+		const params = new URLSearchParams({
+			token: token,
+			provider: backendProvider,
+			model: llmConfig.model,
+		});
+
+		const url = `${wsUrl}/ws/${clientId}?${params.toString()}`;
+
+		console.log(`Connecting to WebSocket with ${llmConfig.provider} (${llmConfig.model}):`, url);
 
 		const websocket = new WebSocket(url);
 		ws.current = websocket;
@@ -112,13 +125,13 @@ export const useWebSocket = () => {
 			dispatch(setConnected(false));
 		};
 
-		// Cleanup on unmount
+		// Cleanup on unmount or when dependencies change
 		return () => {
 			if (websocket.readyState === WebSocket.OPEN) {
 				websocket.close();
 			}
 		};
-	}, [token, clientId, dispatch]);
+	}, [token, clientId, llmConfig.provider, llmConfig.model, dispatch]);
 
 	// Send message function
 	const sendMessage = useCallback(

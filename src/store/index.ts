@@ -2,6 +2,7 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import user from "./features/user/userSlice";
 import chat from "./features/chat/chatSlice";
+import llm from "./features/llm/llmSlice";
 import {
 	persistReducer,
 	persistStore,
@@ -14,12 +15,12 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // uses window.localStorage
 
-const rootReducer = combineReducers({ user, chat });
+const rootReducer = combineReducers({ user, chat, llm });
 
 const persistConfig = {
 	key: "root",
 	storage,
-	whitelist: ["user", "chat"], // persist user and chat slices
+	whitelist: ["user", "chat", "llm"], // persist user, chat, and llm slices
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

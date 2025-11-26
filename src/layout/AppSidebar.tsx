@@ -8,6 +8,7 @@ import { logoutUserFully } from "../store/features/user/userSlice";
 import {
 	ChevronDownIcon,
 	CloseIcon,
+	GearIcon,
 	HorizontaLDots,
 	HouseIcon,
 	LogoutIcon,
@@ -28,6 +29,11 @@ const navItems: NavItem[] = [
 		icon: <HouseIcon />,
 		name: "Home",
 		path: "/home",
+	},
+	{
+		icon: <GearIcon />,
+		name: "Settings",
+		path: "/settings",
 	},
 	{
 		icon: <LogoutIcon />,
