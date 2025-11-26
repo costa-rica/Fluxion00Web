@@ -1,25 +1,35 @@
-# TypeScriptNextJsDashboard
+# Fluxion00Web
 
 ## Overview
 
+This project interfaces with the AI Agents of the Fluxion00 API. The agents in the API have tools to query the database and will have tools to access certain files and documentation.
+
+### source of project
+
 This is a starter project for a dashboard application built with Next.js and TypeScript. It will use Tailwind CSS for styling and Redux Toolkit for state management. The navigation and folder structure will use App Router.
 
-### Overview TL;DR
+## Requriements for this project
 
-- started from `npx create-next-app@latest`
-  - No Turbopack -> this causes problems with the svg icons (src/icons)
-- Heavily lifting the architecture from [free-nextjs-admin-dashboard-main](https://tailadmin.com/download)
-- Customizeing it to fit the needs of the NewsNexus Portal.
-- Uses App Router
-- Uses TailwindCSS
-- Uses Redux for state management
-- Uses TypeScript
+This project will be a chat interface for the AI Agents of the Fluxion00 API. This starter project uses Tailwind CSS for the styling and we want to use the same styling as the NewsNexus Portal. The main difference is that the NewsNexus Portal is a news website and the Fluxion00Web is a chat interface for the AI Agents of the Fluxion00 API and it will use websockets to facilitate the chat interface.
 
-## Imports
+This application maybe viewed on a desktop or mobile device. So we want to make sure the application is responsive.
 
-### Required for Template
+This application will connect with the Fluxion00API on everything except login. The Fluxion00API base url is in the NEXT_PUBLIC_API_BASE_URL env varialbe. The login url is in the NEXT_PUBLIC_API_BASE_URL_FOR_LOGIN env varialbe. The documentation for the Fluxion00API is in the docs folder, docs/API_REFERENCE.md.
 
-- `npm install @reduxjs/toolkit react-redux redux-persist`
-- `npm install tailwind-merge`
-- `npm i -D @svgr/webpack`
-  - this requires a change to the next.config.ts file -- > see the file for details.
+### AppSidebar
+
+This will have the username, a toggle for the theme, and NavItems which will be links to the different pages. Right now there will just be a chat page and logout button.
+
+### Login and Authentication
+
+There will be a login page. The login page will accept an email and password and sent to requests using the NEXT_PUBLIC_API_BASE_URL_FOR_LOGIN environment variable. There will be no registration page or reset password page. Any references to register or reset password shoudl be replaced with sending the user to the NewsNexus Portal using the NEXT_PUBLIC_API_BASE_URL_FOR_LOGIN environment variable.
+
+But users who have been logged into the NewsNexus Portal will not need to log in again. The token can be passed from the NewsNexus Portal to the Fluxion00Web project and the Fluxion00API will have the same JWT secret as the NewsNexus Portal to authenticate the user.
+
+- To help accomplish this News Nexus API uses `const jwt = require("jsonwebtoken");` to code the JWT token.
+
+### Chat page
+
+The chat page will be modular. It will have a chat window with the chat history that is scrollable. The chat window will have a text input field and a send button. There will also be a component that will display a status log of the agent's actions.
+
+For starters let's build a simple chat interface that will use websockets to facilitate the chat interface. Currently the API does not support the status and log of the agent's actions yet.
