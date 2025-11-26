@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { clearMessages } from "@/store/features/chat/chatSlice";
+import { PROVIDER_LABELS } from "@/types/llm";
 import ChatMessage from "./ChatMessage";
 import TypingIndicator from "./TypingIndicator";
 import Button from "@/components/ui/button/Button";
@@ -19,6 +20,7 @@ export default function ChatInterface() {
 	const messages = useAppSelector((state) => state.chat.messages);
 	const isConnected = useAppSelector((state) => state.chat.isConnected);
 	const isTyping = useAppSelector((state) => state.chat.isTyping);
+	const llmConfig = useAppSelector((state) => state.llm.config);
 
 	// Auto-scroll to bottom when new messages arrive
 	useEffect(() => {
@@ -116,9 +118,14 @@ export default function ChatInterface() {
 					</Button>
 				</div>
 				<div className="mt-2 space-y-1">
-					<p className="text-xs text-gray-500 dark:text-gray-400">
-						Use <span className="font-bold">/sql</span> for LLM generated SQL query
-					</p>
+					<div className="flex items-center justify-between">
+						<p className="text-xs text-gray-500 dark:text-gray-400">
+							Use <span className="font-bold">/sql</span> for LLM generated SQL query
+						</p>
+						<p className="text-xs text-gray-500 dark:text-gray-400">
+							Model: <span className="font-medium">{PROVIDER_LABELS[llmConfig.provider]} ({llmConfig.model})</span>
+						</p>
+					</div>
 					<p className="text-xs text-gray-500 dark:text-gray-400">
 						Press Enter to send, Shift+Enter for new line
 					</p>
