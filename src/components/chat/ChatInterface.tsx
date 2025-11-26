@@ -115,9 +115,14 @@ export default function ChatInterface() {
 						Send
 					</Button>
 				</div>
-				<p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-					Press Enter to send, Shift+Enter for new line
-				</p>
+				<div className="mt-2 space-y-1">
+					<p className="text-xs text-gray-500 dark:text-gray-400">
+						Use <span className="font-bold">/sql</span> for LLM generated SQL query
+					</p>
+					<p className="text-xs text-gray-500 dark:text-gray-400">
+						Press Enter to send, Shift+Enter for new line
+					</p>
+				</div>
 			</div>
 		</div>
 	);
