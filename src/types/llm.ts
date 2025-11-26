@@ -10,7 +10,7 @@ export interface LLMConfig {
 // Available models per provider
 export const PROVIDER_MODELS: Record<LLMProvider, string[]> = {
 	ollama: ["mistral:instruct"],
-	chatgpt: ["gpt-4o-mini", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"],
+	chatgpt: ["gpt-4o-mini"],
 };
 
 // Default models per provider
