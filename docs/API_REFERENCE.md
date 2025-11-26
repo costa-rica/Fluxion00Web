@@ -41,7 +41,7 @@ curl http://localhost:8000/health
 
 ## GET /api/info
 
-Returns API metadata including available agent tools and configuration.
+Returns API metadata including available agent tools, supported providers, and configuration.
 
 **Authentication:** Not required
 
@@ -58,7 +58,16 @@ curl http://localhost:8000/api/info
   "name": "Fluxion00API",
   "version": "0.0.1",
   "description": "Adaptive agent framework with LLM and database access",
-  "llm_provider": "Ollama (mistral:instruct)",
+  "supported_providers": {
+    "ollama": {
+      "default_model": "mistral:instruct",
+      "description": "Local Ollama instance"
+    },
+    "openai": {
+      "default_model": "gpt-4o-mini",
+      "description": "OpenAI GPT models"
+    }
+  },
   "available_tools": [
     "count_approved_articles",
     "search_approved_articles",
@@ -81,7 +90,7 @@ curl http://localhost:8000/api/info
 | name | string | API name |
 | version | string | API version |
 | description | string | API description |
-| llm_provider | string | LLM provider and model |
+| supported_providers | object | Supported LLM providers with default models |
 | available_tools | array | List of agent tool names |
 | database | object | Database configuration |
 
@@ -98,30 +107,55 @@ WebSocket endpoint for real-time chat with LLM agent. Supports conversation hist
 |-----------|------|----------|-------------|
 | client_id | string | Yes | Unique client identifier (UUID recommended) |
 | token | string | Yes | JWT token from News Nexus API (query parameter) |
+| provider | string | No | LLM provider type: "ollama" or "openai" (default: "ollama") |
+| model | string | No | Model name (e.g., "gpt-4o-mini", "mistral:instruct"). Uses provider default if not specified. |
 
-**Connection Example**:
+**Connection Examples**:
+
+Default connection (Ollama with mistral:instruct):
 
 ```javascript
 const clientId = crypto.randomUUID();
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 const ws = new WebSocket(`ws://localhost:8000/ws/${clientId}?token=${token}`);
-
-ws.onopen = () => {
-  console.log("Connected");
-};
-
-ws.onmessage = (event) => {
-  const message = JSON.parse(event.data);
-  console.log(message);
-};
 ```
 
-**Authentication Errors**:
+OpenAI with gpt-4o-mini:
+
+```javascript
+const clientId = crypto.randomUUID();
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+const provider = "openai";
+const model = "gpt-4o-mini";
+const ws = new WebSocket(
+  `ws://localhost:8000/ws/${clientId}?token=${token}&provider=${provider}&model=${model}`
+);
+```
+
+OpenAI with default model (gpt-4o-mini):
+
+```javascript
+const ws = new WebSocket(
+  `ws://localhost:8000/ws/${clientId}?token=${token}&provider=openai`
+);
+```
+
+Custom model (backend passes to LLM API without validation):
+
+```javascript
+const ws = new WebSocket(
+  `ws://localhost:8000/ws/${clientId}?token=${token}&provider=openai&model=gpt-4-turbo`
+);
+```
+
+**Error Codes**:
 
 ```
 WebSocket close code 4001: "Authentication required: missing token"
 WebSocket close code 4001: "Authentication failed: Invalid token"
 WebSocket close code 4000: "Authentication error: <error details>"
+WebSocket close code 4000: "Invalid provider: <error details>"
+WebSocket close code 4000: "Provider initialization error: <error details>"
 ```
 
 **Behavior**:
@@ -130,6 +164,8 @@ WebSocket close code 4000: "Authentication error: <error details>"
 - Token must be valid JWT signed with `JWT_SECRET` containing `{ id: <user_id> }`
 - User ID is verified against Users table in database
 - Connection rejected before acceptance if authentication fails
+- Provider and model are specified at connection time and remain fixed for the session
+- Backend does not validate model names - LLM API will return errors for invalid models
 
 ---
 
@@ -147,6 +183,38 @@ Send user message to agent for processing.
   "content": "How many articles have been approved?"
 }
 ```
+
+**Optional Fields**:
+
+- `mode` (string, optional) - Processing mode: `"auto"` (default) or `"sql"` (force Text-to-SQL)
+
+**SQL Mode Example**:
+
+```json
+{
+  "type": "user_message",
+  "content": "Show articles published in California",
+  "mode": "sql"
+}
+```
+
+**Alternative: Command Prefix**
+Users can also trigger SQL mode by prefixing messages with `/sql`:
+
+```json
+{
+  "type": "user_message",
+  "content": "/sql Show articles published in California"
+}
+```
+
+When SQL mode is active (via `mode: "sql"` or `/sql` prefix):
+
+- Bypasses normal tool selection
+- Directly invokes Text-to-SQL engine
+- Generates custom SQL query from natural language
+- Executes query with security validation
+- Returns results in natural language
 
 **Response Flow**:
 
