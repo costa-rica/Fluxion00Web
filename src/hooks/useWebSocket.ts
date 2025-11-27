@@ -8,6 +8,7 @@ import {
 	setClientId,
 	setTyping,
 	addMessage,
+	addProgress,
 } from "@/store/features/chat/chatSlice";
 import { PROVIDER_TO_BACKEND } from "@/types/llm";
 
@@ -105,6 +106,18 @@ export const useWebSocket = () => {
 					case "pong":
 						// Pong received, keep-alive working
 						console.log("Pong received");
+						break;
+
+					case "agent_progress":
+						// Agent progress update
+						dispatch(
+							addProgress({
+								stage: message.stage,
+								message: message.message,
+								timestamp: message.timestamp,
+								details: message.details,
+							})
+						);
 						break;
 
 					default:

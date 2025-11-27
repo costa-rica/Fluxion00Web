@@ -8,11 +8,14 @@ import { clearMessages } from "@/store/features/chat/chatSlice";
 import { PROVIDER_LABELS } from "@/types/llm";
 import ChatMessage from "./ChatMessage";
 import TypingIndicator from "./TypingIndicator";
+import ModalAgentStatus from "./ModalAgentStatus";
 import Button from "@/components/ui/button/Button";
 import TextArea from "@/components/form/input/TextArea";
 
 export default function ChatInterface() {
 	const [inputValue, setInputValue] = useState("");
+	const [showAgentStatus, setShowAgentStatus] = useState(false);
+	const [lastSeenProgressCount, setLastSeenProgressCount] = useState(0);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const dispatch = useAppDispatch();
 
@@ -21,6 +24,10 @@ export default function ChatInterface() {
 	const isConnected = useAppSelector((state) => state.chat.isConnected);
 	const isTyping = useAppSelector((state) => state.chat.isTyping);
 	const llmConfig = useAppSelector((state) => state.llm.config);
+	const progressHistory = useAppSelector((state) => state.chat.progressHistory || []);
+
+	// Check if there are new unseen progress updates
+	const hasNewUpdates = progressHistory.length > lastSeenProgressCount;
 
 	// Auto-scroll to bottom when new messages arrive
 	useEffect(() => {
@@ -45,7 +52,19 @@ export default function ChatInterface() {
 		if (window.confirm("Are you sure you want to clear the conversation history?")) {
 			dispatch(clearMessages());
 			clearHistory();
+			setLastSeenProgressCount(0);
 		}
+	};
+
+	const handleOpenAgentStatus = () => {
+		setShowAgentStatus(true);
+		// Mark all current updates as seen
+		setLastSeenProgressCount(progressHistory.length);
+	};
+
+	const handleCloseAgentStatus = () => {
+		setShowAgentStatus(false);
+		// Keep the last seen count so button doesn't highlight until new updates arrive
 	};
 
 	return (
@@ -63,14 +82,25 @@ export default function ChatInterface() {
 						{process.env.NEXT_PUBLIC_APP_NAME || "Fluxion"} AI Chat
 					</h2>
 				</div>
-				<Button
-					onClick={handleClearHistory}
-					variant="outline"
-					size="sm"
-					disabled={!isConnected || messages.length === 0}
-				>
-					Clear History
-				</Button>
+				<div className="flex items-center space-x-2">
+					<Button
+						onClick={handleOpenAgentStatus}
+						variant="outline"
+						size="sm"
+						disabled={!isConnected}
+						className={hasNewUpdates && !showAgentStatus ? "!bg-brand-500 !text-white !border-brand-500 hover:!bg-brand-600" : ""}
+					>
+						Agent Status
+					</Button>
+					<Button
+						onClick={handleClearHistory}
+						variant="outline"
+						size="sm"
+						disabled={!isConnected || messages.length === 0}
+					>
+						Clear History
+					</Button>
+				</div>
 			</div>
 
 			{/* Messages area */}
@@ -131,6 +161,12 @@ export default function ChatInterface() {
 					</p>
 				</div>
 			</div>
+
+			{/* Agent Status Modal */}
+			<ModalAgentStatus
+				isOpen={showAgentStatus}
+				onClose={handleCloseAgentStatus}
+			/>
 		</div>
 	);
 }

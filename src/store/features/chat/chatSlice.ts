@@ -1,6 +1,7 @@
 // src/store/features/chat/chatSlice.ts
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ProgressUpdate } from "@/types/progress";
 
 export interface Message {
 	id: string;
@@ -14,6 +15,7 @@ export interface ChatState {
 	isConnected: boolean;
 	isTyping: boolean;
 	clientId: string | null;
+	progressHistory: ProgressUpdate[];
 }
 
 const initialState: ChatState = {
@@ -21,6 +23,7 @@ const initialState: ChatState = {
 	isConnected: false,
 	isTyping: false,
 	clientId: null,
+	progressHistory: [],
 };
 
 export const chatSlice = createSlice({
@@ -29,6 +32,10 @@ export const chatSlice = createSlice({
 	reducers: {
 		setConnected: (state, action: PayloadAction<boolean>) => {
 			state.isConnected = action.payload;
+			// Reset typing indicator when connection state changes
+			if (action.payload === true) {
+				state.isTyping = false;
+			}
 		},
 		setClientId: (state, action: PayloadAction<string>) => {
 			state.clientId = action.payload;
@@ -41,11 +48,19 @@ export const chatSlice = createSlice({
 		},
 		clearMessages: (state) => {
 			state.messages = [];
+			state.progressHistory = [];
+			state.isTyping = false;
+		},
+		addProgress: (state, action: PayloadAction<ProgressUpdate>) => {
+			state.progressHistory.push(action.payload);
+		},
+		clearProgress: (state) => {
+			state.progressHistory = [];
 		},
 	},
 });
 
-export const { setConnected, setClientId, setTyping, addMessage, clearMessages } =
+export const { setConnected, setClientId, setTyping, addMessage, clearMessages, addProgress, clearProgress } =
 	chatSlice.actions;
 
 export default chatSlice.reducer;
