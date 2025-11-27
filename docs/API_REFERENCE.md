@@ -319,6 +319,47 @@ Error message from agent or system.
 }
 ```
 
+#### agent_progress
+
+Real-time progress updates showing agent's internal processing stages.
+
+```json
+{
+  "type": "agent_progress",
+  "stage": "tool_execution",
+  "message": "Executing tool: search_approved_articles",
+  "timestamp": 1701234567.89,
+  "details": {
+    "tool": "search_approved_articles",
+    "arguments": { "search_text": "California" }
+  }
+}
+```
+
+**Progress Stages**:
+| Stage | Description |
+|-------|-------------|
+| processing | Initial message processing |
+| analyzing | Analyzing user question |
+| tool_execution | Executing a database tool |
+| tool_success | Tool executed successfully |
+| tool_error | Tool execution failed |
+| sql_generation | Generating SQL query (SQL mode) |
+| sql_executed | SQL query executed successfully |
+| sql_error | SQL execution failed |
+| llm_summarizing | Generating natural language summary |
+| generating_response | Generating final response |
+| completed | Processing completed |
+
+**Progress Message Fields**:
+| Field | Type | Description |
+|-------|------|-------------|
+| type | string | Always "agent_progress" |
+| stage | string | Current processing stage |
+| message | string | Human-readable progress message |
+| timestamp | number | Unix timestamp (seconds since epoch) |
+| details | object | Optional additional details (tool names, arguments, etc.) |
+
 ---
 
 ## Agent Tools
